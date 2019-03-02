@@ -190,10 +190,10 @@ class ProtoStreamObjectWriterTest : public BaseProtoStreamObjectWriterTest {
   virtual ~ProtoStreamObjectWriterTest() {}
 };
 
-INSTANTIATE_TEST_CASE_P(DifferentTypeInfoSourceTest,
-                        ProtoStreamObjectWriterTest,
-                        ::testing::Values(
-                            testing::USE_TYPE_RESOLVER));
+INSTANTIATE_TEST_SUITE_P(DifferentTypeInfoSourceTest,
+                         ProtoStreamObjectWriterTest,
+                         ::testing::Values(
+                             testing::USE_TYPE_RESOLVER));
 
 TEST_P(ProtoStreamObjectWriterTest, EmptyObject) {
   Book empty;
@@ -301,6 +301,65 @@ TEST_P(ProtoStreamObjectWriterTest, IntEnumValuesAreAccepted) {
   CheckOutput(book);
 }
 
+TEST_P(ProtoStreamObjectWriterTest, EnumValuesWithDifferentCaseIsRejected) {
+  Book book;
+  book.set_title("Some Book");
+  Author* robert = book.mutable_author();
+  robert->set_name("robert");
+
+  options_.case_insensitive_enum_parsing = false;
+  ResetProtoWriter();
+
+  ow_->StartObject("")
+      ->RenderString("title", "Some Book")
+      ->RenderString("type", "action_and_adventure")
+      ->StartObject("author")
+      ->RenderString("name", "robert")
+      ->EndObject()
+      ->EndObject();
+  CheckOutput(book);
+}
+
+TEST_P(ProtoStreamObjectWriterTest, EnumValuesWithSameCaseIsAccepted) {
+  Book book;
+  book.set_title("Some Book");
+  book.set_type(google::protobuf::testing::Book_Type_ACTION_AND_ADVENTURE);
+  Author* robert = book.mutable_author();
+  robert->set_name("robert");
+
+  options_.case_insensitive_enum_parsing = false;
+  ResetProtoWriter();
+
+  ow_->StartObject("")
+      ->RenderString("title", "Some Book")
+      ->RenderString("type", "ACTION_AND_ADVENTURE")
+      ->StartObject("author")
+      ->RenderString("name", "robert")
+      ->EndObject()
+      ->EndObject();
+  CheckOutput(book);
+}
+
+TEST_P(ProtoStreamObjectWriterTest, EnumValuesWithDifferentCaseIsAccepted) {
+  Book book;
+  book.set_title("Some Book");
+  book.set_type(google::protobuf::testing::Book_Type_ACTION_AND_ADVENTURE);
+  Author* robert = book.mutable_author();
+  robert->set_name("robert");
+
+  options_.case_insensitive_enum_parsing = true;
+  ResetProtoWriter();
+
+  ow_->StartObject("")
+      ->RenderString("title", "Some Book")
+      ->RenderString("type", "action_AND_adventure")
+      ->StartObject("author")
+      ->RenderString("name", "robert")
+      ->EndObject()
+      ->EndObject();
+  CheckOutput(book);
+}
+
 TEST_P(ProtoStreamObjectWriterTest, EnumValuesWithoutUnderscoreAreAccepted) {
   Book book;
   book.set_title("Some Book");
@@ -334,6 +393,28 @@ TEST_P(ProtoStreamObjectWriterTest, EnumValuesInCamelCaseAreAccepted) {
   ow_->StartObject("")
       ->RenderString("title", "Some Book")
       ->RenderString("type", "actionAndAdventure")
+      ->StartObject("author")
+      ->RenderString("name", "robert")
+      ->EndObject()
+      ->EndObject();
+  CheckOutput(book);
+}
+
+TEST_P(ProtoStreamObjectWriterTest,
+       EnumValuesInCamelCaseRemoveDashAndUnderscoreAreAccepted) {
+  Book book;
+  book.set_title("Some Book");
+  book.set_type(google::protobuf::testing::Book_Type_ACTION_AND_ADVENTURE);
+  Author* robert = book.mutable_author();
+  robert->set_name("robert");
+
+  options_.use_lower_camel_for_enums = true;
+  options_.case_insensitive_enum_parsing = false;
+  ResetProtoWriter();
+
+  ow_->StartObject("")
+      ->RenderString("title", "Some Book")
+      ->RenderString("type", "action-And_Adventure")
       ->StartObject("author")
       ->RenderString("name", "robert")
       ->EndObject()
@@ -1117,10 +1198,10 @@ class ProtoStreamObjectWriterTimestampDurationTest
   }
 };
 
-INSTANTIATE_TEST_CASE_P(DifferentTypeInfoSourceTest,
-                        ProtoStreamObjectWriterTimestampDurationTest,
-                        ::testing::Values(
-                            testing::USE_TYPE_RESOLVER));
+INSTANTIATE_TEST_SUITE_P(DifferentTypeInfoSourceTest,
+                         ProtoStreamObjectWriterTimestampDurationTest,
+                         ::testing::Values(
+                             testing::USE_TYPE_RESOLVER));
 
 TEST_P(ProtoStreamObjectWriterTimestampDurationTest, ParseTimestamp) {
   TimestampDuration timestamp;
@@ -1513,10 +1594,10 @@ class ProtoStreamObjectWriterStructTest
   }
 };
 
-INSTANTIATE_TEST_CASE_P(DifferentTypeInfoSourceTest,
-                        ProtoStreamObjectWriterStructTest,
-                        ::testing::Values(
-                            testing::USE_TYPE_RESOLVER));
+INSTANTIATE_TEST_SUITE_P(DifferentTypeInfoSourceTest,
+                         ProtoStreamObjectWriterStructTest,
+                         ::testing::Values(
+                             testing::USE_TYPE_RESOLVER));
 
 // TODO(skarvaje): Write tests for failure cases.
 TEST_P(ProtoStreamObjectWriterStructTest, StructRenderSuccess) {
@@ -1665,10 +1746,10 @@ class ProtoStreamObjectWriterMapTest : public BaseProtoStreamObjectWriterTest {
   }
 };
 
-INSTANTIATE_TEST_CASE_P(DifferentTypeInfoSourceTest,
-                        ProtoStreamObjectWriterMapTest,
-                        ::testing::Values(
-                            testing::USE_TYPE_RESOLVER));
+INSTANTIATE_TEST_SUITE_P(DifferentTypeInfoSourceTest,
+                         ProtoStreamObjectWriterMapTest,
+                         ::testing::Values(
+                             testing::USE_TYPE_RESOLVER));
 
 TEST_P(ProtoStreamObjectWriterMapTest, MapShouldNotAcceptList) {
   MapIn mm;
@@ -1762,10 +1843,10 @@ class ProtoStreamObjectWriterAnyTest : public BaseProtoStreamObjectWriterTest {
   }
 };
 
-INSTANTIATE_TEST_CASE_P(DifferentTypeInfoSourceTest,
-                        ProtoStreamObjectWriterAnyTest,
-                        ::testing::Values(
-                            testing::USE_TYPE_RESOLVER));
+INSTANTIATE_TEST_SUITE_P(DifferentTypeInfoSourceTest,
+                         ProtoStreamObjectWriterAnyTest,
+                         ::testing::Values(
+                             testing::USE_TYPE_RESOLVER));
 
 TEST_P(ProtoStreamObjectWriterAnyTest, AnyRenderSuccess) {
   AnyOut any;
@@ -2403,10 +2484,10 @@ class ProtoStreamObjectWriterFieldMaskTest
   }
 };
 
-INSTANTIATE_TEST_CASE_P(DifferentTypeInfoSourceTest,
-                        ProtoStreamObjectWriterFieldMaskTest,
-                        ::testing::Values(
-                            testing::USE_TYPE_RESOLVER));
+INSTANTIATE_TEST_SUITE_P(DifferentTypeInfoSourceTest,
+                         ProtoStreamObjectWriterFieldMaskTest,
+                         ::testing::Values(
+                             testing::USE_TYPE_RESOLVER));
 
 TEST_P(ProtoStreamObjectWriterFieldMaskTest, SimpleFieldMaskTest) {
   FieldMaskTest expected;
@@ -2656,10 +2737,10 @@ class ProtoStreamObjectWriterWrappersTest
   }
 };
 
-INSTANTIATE_TEST_CASE_P(DifferentTypeInfoSourceTest,
-                        ProtoStreamObjectWriterWrappersTest,
-                        ::testing::Values(
-                            testing::USE_TYPE_RESOLVER));
+INSTANTIATE_TEST_SUITE_P(DifferentTypeInfoSourceTest,
+                         ProtoStreamObjectWriterWrappersTest,
+                         ::testing::Values(
+                             testing::USE_TYPE_RESOLVER));
 
 TEST_P(ProtoStreamObjectWriterWrappersTest, WrapperAcceptsNull) {
   Int32Wrapper wrapper;
@@ -2679,10 +2760,10 @@ class ProtoStreamObjectWriterOneOfsTest
   }
 };
 
-INSTANTIATE_TEST_CASE_P(DifferentTypeInfoSourceTest,
-                        ProtoStreamObjectWriterOneOfsTest,
-                        ::testing::Values(
-                            testing::USE_TYPE_RESOLVER));
+INSTANTIATE_TEST_SUITE_P(DifferentTypeInfoSourceTest,
+                         ProtoStreamObjectWriterOneOfsTest,
+                         ::testing::Values(
+                             testing::USE_TYPE_RESOLVER));
 
 TEST_P(ProtoStreamObjectWriterOneOfsTest,
        MultipleOneofsFailForPrimitiveTypesTest) {

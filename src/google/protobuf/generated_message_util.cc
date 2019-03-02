@@ -44,6 +44,7 @@
 #include <google/protobuf/io/coded_stream.h>
 #include <google/protobuf/arenastring.h>
 #include <google/protobuf/extension_set.h>
+#include <google/protobuf/generated_message_table_driven.h>
 #include <google/protobuf/message_lite.h>
 #include <google/protobuf/metadata_lite.h>
 #include <google/protobuf/stubs/mutex.h>
@@ -293,8 +294,15 @@ void SerializeMessageNoTable(const MessageLite* msg,
 }
 
 void SerializeMessageNoTable(const MessageLite* msg, ArrayOutput* output) {
-  output->ptr = msg->InternalSerializeWithCachedSizesToArray(
-      output->is_deterministic, output->ptr);
+  if (output->is_deterministic) {
+    io::ArrayOutputStream array_stream(output->ptr, INT_MAX);
+    io::CodedOutputStream o(&array_stream);
+    o.SetSerializationDeterministic(true);
+    msg->SerializeWithCachedSizes(&o);
+    output->ptr += o.ByteCount();
+  } else {
+    output->ptr = msg->InternalSerializeWithCachedSizesToArray(output->ptr);
+  }
 }
 
 // Helper to branch to fast path if possible
@@ -303,14 +311,15 @@ void SerializeMessageDispatch(const MessageLite& msg,
                               int32 cached_size,
                               io::CodedOutputStream* output) {
   const uint8* base = reinterpret_cast<const uint8*>(&msg);
-  // Try the fast path
-  uint8* ptr = output->GetDirectBufferForNBytesAndAdvance(cached_size);
-  if (ptr) {
-    // We use virtual dispatch to enable dedicated generated code for the
-    // fast path.
-    msg.InternalSerializeWithCachedSizesToArray(
-        output->IsSerializationDeterministic(), ptr);
-    return;
+  if (!output->IsSerializationDeterministic()) {
+    // Try the fast path
+    uint8* ptr = output->GetDirectBufferForNBytesAndAdvance(cached_size);
+    if (ptr) {
+      // We use virtual dispatch to enable dedicated generated code for the
+      // fast path.
+      msg.InternalSerializeWithCachedSizesToArray(ptr);
+      return;
+    }
   }
   SerializeInternal(base, field_table, num_fields, output);
 }
@@ -620,6 +629,7 @@ bool IsNull<FieldMetadata::kInlinedType>(const void* ptr) {
 void SerializeInternal(const uint8* base,
                        const FieldMetadata* field_metadata_table,
                        int32 num_fields, io::CodedOutputStream* output) {
+  SpecialSerializer func = nullptr;
   for (int i = 0; i < num_fields; i++) {
     const FieldMetadata& field_metadata = field_metadata_table[i];
     const uint8* ptr = base + field_metadata.offset;
@@ -646,9 +656,9 @@ void SerializeInternal(const uint8* base,
 
       // Special cases
       case FieldMetadata::kSpecial:
-        reinterpret_cast<SpecialSerializer>(
-            const_cast<void*>(field_metadata.ptr))(
-            base, field_metadata.offset, field_metadata.tag,
+        func = reinterpret_cast<SpecialSerializer>(
+            const_cast<void*>(field_metadata.ptr));
+        func (base, field_metadata.offset, field_metadata.tag,
             field_metadata.has_offset, output);
         break;
       default:
@@ -664,6 +674,7 @@ uint8* SerializeInternalToArray(const uint8* base,
                                 uint8* buffer) {
   ArrayOutput array_output = {buffer, is_deterministic};
   ArrayOutput* output = &array_output;
+  SpecialSerializer func = nullptr;
   for (int i = 0; i < num_fields; i++) {
     const FieldMetadata& field_metadata = field_metadata_table[i];
     const uint8* ptr = base + field_metadata.offset;
@@ -692,9 +703,9 @@ uint8* SerializeInternalToArray(const uint8* base,
         io::ArrayOutputStream array_stream(array_output.ptr, INT_MAX);
         io::CodedOutputStream output(&array_stream);
         output.SetSerializationDeterministic(is_deterministic);
-        reinterpret_cast<SpecialSerializer>(
-            const_cast<void*>(field_metadata.ptr))(
-            base, field_metadata.offset, field_metadata.tag,
+                func =  reinterpret_cast<SpecialSerializer>(
+            const_cast<void*>(field_metadata.ptr));
+                func (base, field_metadata.offset, field_metadata.tag,
             field_metadata.has_offset, &output);
         array_output.ptr += output.ByteCount();
       } break;

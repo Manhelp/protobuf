@@ -41,6 +41,8 @@ goog.provide('jspb.Message');
 goog.require('goog.array');
 goog.require('goog.asserts');
 goog.require('goog.crypt.base64');
+goog.require('jspb.BinaryConstants');
+goog.require('jspb.BinaryReader');
 goog.require('jspb.Map');
 
 // Not needed in compilation units that have no protos with xids.
@@ -181,9 +183,6 @@ goog.define('jspb.Message.GENERATE_TO_OBJECT', true);
  *     calling fromObject. Enabling this might disable the JSCompiler's ability
  *     to dead code eliminate fields used in protocol buffers that are never
  *     used in an application.
- *     NOTE: By default no protos actually have a fromObject method. You need to
- *     add the jspb.generate_from_object options to the proto definition to
- *     activate the feature.
  *     By default this is enabled for test code only.
  */
 goog.define('jspb.Message.GENERATE_FROM_OBJECT', !goog.DISALLOW_TEST_ONLY_CODE);
@@ -622,10 +621,7 @@ jspb.Message.serializeBinaryExtensions = function(proto, writer, extensions,
  * Reads an extension field from the given reader and, if a valid extension,
  * sets the extension value.
  * @param {!jspb.Message} msg A jspb proto.
- * @param {{
- *   skipField:function(this:jspb.BinaryReader),
- *   getFieldNumber:function(this:jspb.BinaryReader):number
- * }} reader
+ * @param {!jspb.BinaryReader} reader
  * @param {!Object} extensions The extensions object.
  * @param {function(this:jspb.Message,!jspb.ExtensionFieldInfo)} getExtensionFn
  * @param {function(this:jspb.Message,!jspb.ExtensionFieldInfo, ?)} setExtensionFn
@@ -704,20 +700,7 @@ jspb.Message.getField = function(msg, fieldNumber) {
  * @protected
  */
 jspb.Message.getRepeatedField = function(msg, fieldNumber) {
-  if (fieldNumber < msg.pivot_) {
-    var index = jspb.Message.getIndex_(msg, fieldNumber);
-    var val = msg.array[index];
-    if (val === jspb.Message.EMPTY_LIST_SENTINEL_) {
-      return msg.array[index] = [];
-    }
-    return val;
-  }
-
-  var val = msg.extensionObject_[fieldNumber];
-  if (val === jspb.Message.EMPTY_LIST_SENTINEL_) {
-    return msg.extensionObject_[fieldNumber] = [];
-  }
-  return val;
+  return /** @type {!Array} */ (jspb.Message.getField(msg, fieldNumber));
 };
 
 

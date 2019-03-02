@@ -53,17 +53,11 @@
 #include <google/protobuf/stubs/strutil.h>
 #include <google/protobuf/stubs/substitute.h>
 
+
 namespace google {
 namespace protobuf {
 namespace compiler {
 namespace java {
-
-namespace {
-bool GenerateHasBits(const Descriptor* descriptor) {
-  return SupportFieldPresence(descriptor->file()) ||
-      HasRepeatedFields(descriptor);
-}
-}  // namespace
 
 MessageBuilderLiteGenerator::MessageBuilderLiteGenerator(
     const Descriptor* descriptor, Context* context)
@@ -101,8 +95,7 @@ Generate(io::Printer* printer) {
         descriptor_->oneof_decl(i))->name;
     vars["oneof_capitalized_name"] = context_->GetOneofGeneratorInfo(
         descriptor_->oneof_decl(i))->capitalized_name;
-    vars["oneof_index"] =
-        SimpleItoa(descriptor_->oneof_decl(i)->index());
+    vars["oneof_index"] = StrCat(descriptor_->oneof_decl(i)->index());
 
     // oneofCase() and clearOneof()
     printer->Print(vars,

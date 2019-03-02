@@ -126,6 +126,7 @@ class MapImplTest : public ::testing::Test {
     // Test map size is correct.
     EXPECT_EQ(value, map_[key]);
     EXPECT_EQ(1, map_.count(key));
+    EXPECT_TRUE(map_.contains(key));
 
     // Check mutable at and find work correctly.
     EXPECT_EQ(value, map_.at(key));
@@ -246,6 +247,14 @@ TEST_F(MapImplTest, MapKeyAssignment) {
 
 TEST_F(MapImplTest, CountNonExist) {
   EXPECT_EQ(0, map_.count(0));
+}
+
+TEST_F(MapImplTest, ContainNotExist) {
+  EXPECT_FALSE(map_.contains(0));
+}
+
+TEST_F(MapImplTest, ImmutableContainNotExist) {
+  EXPECT_FALSE(const_map_.contains(0));
 }
 
 TEST_F(MapImplTest, MutableFindNonExist) {
@@ -2042,19 +2051,30 @@ TEST(GeneratedMapFieldTest, DynamicMessageMergeFromDynamicMessage) {
       unittest::TestMap::descriptor());
   reflection_tester.SetMapFieldsViaMapReflection(message1.get());
 
+  // message2 is created by same factory.
   std::unique_ptr<Message> message2;
   message2.reset(
       factory.GetPrototype(unittest::TestMap::descriptor())->New());
   reflection_tester.SetMapFieldsViaMapReflection(message2.get());
 
+  // message3 is created by different factory.
+  DynamicMessageFactory factory3;
+  std::unique_ptr<Message> message3;
+  message3.reset(
+      factory3.GetPrototype(unittest::TestMap::descriptor())->New());
+  reflection_tester.SetMapFieldsViaMapReflection(message3.get());
+
   message2->MergeFrom(*message1);
+  message3->MergeFrom(*message1);
 
   // Test MergeFrom does not sync to repeated fields and
   // there is no duplicate keys in text format.
-  string output1, output2;
+  string output1, output2, output3;
   TextFormat::PrintToString(*message1, &output1);
   TextFormat::PrintToString(*message2, &output2);
+  TextFormat::PrintToString(*message3, &output3);
   EXPECT_EQ(output1, output2);
+  EXPECT_EQ(output1, output3);
 }
 
 TEST(GeneratedMapFieldTest, DynamicMessageCopyFrom) {

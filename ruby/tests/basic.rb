@@ -154,12 +154,12 @@ module BasicTest
       e = assert_raise ArgumentError do
         MapMessage.new(:map_string_int32 => "hello")
       end
-      assert_equal e.message, "Expected Hash object as initializer value for map field 'map_string_int32'."
+      assert_equal e.message, "Expected Hash object as initializer value for map field 'map_string_int32' (given String)."
 
       e = assert_raise ArgumentError do
         TestMessage.new(:repeated_uint32 => "hello")
       end
-      assert_equal e.message, "Expected array as initializer value for repeated field 'repeated_uint32'."
+      assert_equal e.message, "Expected array as initializer value for repeated field 'repeated_uint32' (given String)."
     end
 
     def test_map_field
@@ -252,6 +252,19 @@ module BasicTest
       m3.map_string_msg.map { |msg| kv[msg.key] = msg.value }
       assert kv == {"a" => TestMessage2.new(:foo => 1),
                     "b" => TestMessage2.new(:foo => 2)}
+    end
+
+    def test_protobuf_decode_json_ignore_unknown_fields
+      m = TestMessage.decode_json({
+        optional_string: "foo",
+        not_in_message: "some_value"
+      }.to_json, { ignore_unknown_fields: true })
+
+      assert_equal m.optional_string, "foo"
+      e = assert_raise Google::Protobuf::ParseError do
+        TestMessage.decode_json({ not_in_message: "some_value" }.to_json)
+      end
+      assert_match(/No such field: not_in_message/, e.message)
     end
 
     def test_to_h

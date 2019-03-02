@@ -364,7 +364,7 @@ public abstract class GeneratedMessageV3 extends AbstractMessage
       throw e.unwrapIOException();
     }
   }
-  
+
   protected static boolean canUseUnsafe() {
     return UnsafeUtil.hasUnsafeArrayOperations() && UnsafeUtil.hasUnsafeByteBufferOperations();
   }
@@ -1678,6 +1678,15 @@ public abstract class GeneratedMessageV3 extends AbstractMessage
         return (BuilderType) this;
       } else {
         return super.addRepeatedField(field, value);
+      }
+    }
+
+    @Override
+    public Message.Builder newBuilderForField(final FieldDescriptor field) {
+      if (field.isExtension()) {
+        return DynamicMessage.newBuilder(field.getMessageType());
+      } else {
+        return super.newBuilderForField(field);
       }
     }
 

@@ -2910,9 +2910,8 @@ TEST_P(AllowUnknownDependenciesTest,
   ASSERT_TRUE(pool_->FindMessageTypeByName("undeclared.Quux") == NULL);
 }
 
-INSTANTIATE_TEST_CASE_P(DatabaseSource,
-                        AllowUnknownDependenciesTest,
-                        testing::Values(NO_DATABASE, FALLBACK_DATABASE));
+INSTANTIATE_TEST_SUITE_P(DatabaseSource, AllowUnknownDependenciesTest,
+                         testing::Values(NO_DATABASE, FALLBACK_DATABASE));
 
 // ===================================================================
 
@@ -6005,6 +6004,34 @@ TEST_F(ValidationErrorTest, MapEntryConflictsWithEnum) {
       "with an existing enum type.\n");
 }
 
+TEST_F(ValidationErrorTest, EnumValuesConflictWithDifferentCasing) {
+  BuildFileWithErrors(
+      "syntax: 'proto3'"
+      "name: 'foo.proto' "
+      "enum_type {"
+      "  name: 'FooEnum' "
+      "  value { name: 'BAR' number: 0 }"
+      "  value { name: 'bar' number: 1 }"
+      "}",
+      "foo.proto: bar: NAME: Enum name bar has the same name as BAR "
+      "if you ignore case and strip out the enum name prefix (if any). "
+      "This is error-prone and can lead to undefined behavior. "
+      "Please avoid doing this. If you are using allow_alias, please assign "
+      "the same numeric value to both enums.\n");
+
+  // Not an error because both enums are mapped to the same value.
+  BuildFile(
+      "syntax: 'proto3'"
+      "name: 'foo.proto' "
+      "enum_type {"
+      "  name: 'FooEnum' "
+      "  options { allow_alias: true }"
+      "  value { name: 'UNKNOWN' number: 0 }"
+      "  value { name: 'BAR' number: 1 }"
+      "  value { name: 'bar' number: 1 }"
+      "}");
+}
+
 TEST_F(ValidationErrorTest, EnumValuesConflictWhenPrefixesStripped) {
   BuildFileWithErrors(
       "syntax: 'proto3'"
@@ -6014,9 +6041,11 @@ TEST_F(ValidationErrorTest, EnumValuesConflictWhenPrefixesStripped) {
       "  value { name: 'FOO_ENUM_BAZ' number: 0 }"
       "  value { name: 'BAZ' number: 1 }"
       "}",
-      "foo.proto: BAZ: NAME: When enum name is stripped and label is "
-      "PascalCased (Baz), this value label conflicts with FOO_ENUM_BAZ. This "
-      "will make the proto fail to compile for some languages, such as C#.\n");
+      "foo.proto: BAZ: NAME: Enum name BAZ has the same name as FOO_ENUM_BAZ "
+      "if you ignore case and strip out the enum name prefix (if any). "
+      "This is error-prone and can lead to undefined behavior. "
+      "Please avoid doing this. If you are using allow_alias, please assign "
+      "the same numeric value to both enums.\n");
 
   BuildFileWithErrors(
       "syntax: 'proto3'"
@@ -6026,9 +6055,11 @@ TEST_F(ValidationErrorTest, EnumValuesConflictWhenPrefixesStripped) {
       "  value { name: 'FOOENUM_BAZ' number: 0 }"
       "  value { name: 'BAZ' number: 1 }"
       "}",
-      "foo.proto: BAZ: NAME: When enum name is stripped and label is "
-      "PascalCased (Baz), this value label conflicts with FOOENUM_BAZ. This "
-      "will make the proto fail to compile for some languages, such as C#.\n");
+      "foo.proto: BAZ: NAME: Enum name BAZ has the same name as FOOENUM_BAZ "
+      "if you ignore case and strip out the enum name prefix (if any). "
+      "This is error-prone and can lead to undefined behavior. "
+      "Please avoid doing this. If you are using allow_alias, please assign "
+      "the same numeric value to both enums.\n");
 
   BuildFileWithErrors(
       "syntax: 'proto3'"
@@ -6038,10 +6069,11 @@ TEST_F(ValidationErrorTest, EnumValuesConflictWhenPrefixesStripped) {
       "  value { name: 'FOO_ENUM_BAR_BAZ' number: 0 }"
       "  value { name: 'BAR__BAZ' number: 1 }"
       "}",
-      "foo.proto: BAR__BAZ: NAME: When enum name is stripped and label is "
-      "PascalCased (BarBaz), this value label conflicts with "
-      "FOO_ENUM_BAR_BAZ. This will make the proto fail to compile for some "
-      "languages, such as C#.\n");
+      "foo.proto: BAR__BAZ: NAME: Enum name BAR__BAZ has the same name as "
+      "FOO_ENUM_BAR_BAZ if you ignore case and strip out the enum name prefix "
+      "(if any). This is error-prone and can lead to undefined behavior. "
+      "Please avoid doing this. If you are using allow_alias, please assign "
+      "the same numeric value to both enums.\n");
 
   BuildFileWithErrors(
       "syntax: 'proto3'"
@@ -6051,10 +6083,11 @@ TEST_F(ValidationErrorTest, EnumValuesConflictWhenPrefixesStripped) {
       "  value { name: 'FOO_ENUM__BAR_BAZ' number: 0 }"
       "  value { name: 'BAR_BAZ' number: 1 }"
       "}",
-      "foo.proto: BAR_BAZ: NAME: When enum name is stripped and label is "
-      "PascalCased (BarBaz), this value label conflicts with "
-      "FOO_ENUM__BAR_BAZ. This will make the proto fail to compile for some "
-      "languages, such as C#.\n");
+      "foo.proto: BAR_BAZ: NAME: Enum name BAR_BAZ has the same name as "
+      "FOO_ENUM__BAR_BAZ if you ignore case and strip out the enum name prefix "
+      "(if any). This is error-prone and can lead to undefined behavior. "
+      "Please avoid doing this. If you are using allow_alias, please assign "
+      "the same numeric value to both enums.\n");
 
   // This isn't an error because the underscore will cause the PascalCase to
   // differ by case (BarBaz vs. Barbaz).

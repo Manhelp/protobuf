@@ -54,17 +54,13 @@
 #include <google/protobuf/stubs/substitute.h>
 
 
+
 namespace google {
 namespace protobuf {
 namespace compiler {
 namespace java {
 
 namespace {
-bool GenerateHasBits(const Descriptor* descriptor) {
-  return SupportFieldPresence(descriptor->file()) ||
-      HasRepeatedFields(descriptor);
-}
-
 string MapValueImmutableClassdName(const Descriptor* descriptor,
                                    ClassNameResolver* name_resolver) {
   const FieldDescriptor* value_field = descriptor->FindFieldByName("value");
@@ -125,8 +121,7 @@ Generate(io::Printer* printer) {
         descriptor_->oneof_decl(i))->name;
     vars["oneof_capitalized_name"] = context_->GetOneofGeneratorInfo(
         descriptor_->oneof_decl(i))->capitalized_name;
-    vars["oneof_index"] =
-        SimpleItoa(descriptor_->oneof_decl(i)->index());
+    vars["oneof_index"] = StrCat(descriptor_->oneof_decl(i)->index());
     // oneofCase_ and oneof_
     printer->Print(vars,
       "private int $oneof_name$Case_ = 0;\n"
@@ -149,18 +144,16 @@ Generate(io::Printer* printer) {
       "\n");
   }
 
-  if (GenerateHasBits(descriptor_)) {
-    // Integers for bit fields.
-    int totalBits = 0;
-    for (int i = 0; i < descriptor_->field_count(); i++) {
-      totalBits += field_generators_.get(descriptor_->field(i))
-          .GetNumBitsForBuilder();
-    }
-    int totalInts = (totalBits + 31) / 32;
-    for (int i = 0; i < totalInts; i++) {
-      printer->Print("private int $bit_field_name$;\n",
-        "bit_field_name", GetBitFieldName(i));
-    }
+  // Integers for bit fields.
+  int totalBits = 0;
+  for (int i = 0; i < descriptor_->field_count(); i++) {
+    totalBits +=
+        field_generators_.get(descriptor_->field(i)).GetNumBitsForBuilder();
+  }
+  int totalInts = (totalBits + 31) / 32;
+  for (int i = 0; i < totalInts; i++) {
+    printer->Print("private int $bit_field_name$;\n", "bit_field_name",
+                   GetBitFieldName(i));
   }
 
   for (int i = 0; i < descriptor_->field_count(); i++) {
@@ -233,7 +226,7 @@ GenerateDescriptorMethods(io::Printer* printer) {
       printer->Print(
           "case $number$:\n"
           "  return internalGet$capitalized_name$();\n",
-          "number", SimpleItoa(field->number()), "capitalized_name",
+          "number", StrCat(field->number()), "capitalized_name",
           info->capitalized_name);
     }
     printer->Print(
@@ -259,7 +252,7 @@ GenerateDescriptorMethods(io::Printer* printer) {
       printer->Print(
           "case $number$:\n"
           "  return internalGetMutable$capitalized_name$();\n",
-          "number", SimpleItoa(field->number()), "capitalized_name",
+          "number", StrCat(field->number()), "capitalized_name",
           info->capitalized_name);
     }
     printer->Print(
@@ -408,19 +401,17 @@ GenerateCommonBuilderMethods(io::Printer* printer) {
   int totalBuilderInts = (totalBuilderBits + 31) / 32;
   int totalMessageInts = (totalMessageBits + 31) / 32;
 
-  if (GenerateHasBits(descriptor_)) {
-    // Local vars for from and to bit fields to avoid accessing the builder and
-    // message over and over for these fields. Seems to provide a slight
-    // perforamance improvement in micro benchmark and this is also what proto1
-    // code does.
-    for (int i = 0; i < totalBuilderInts; i++) {
-      printer->Print("int from_$bit_field_name$ = $bit_field_name$;\n",
-        "bit_field_name", GetBitFieldName(i));
-    }
-    for (int i = 0; i < totalMessageInts; i++) {
-      printer->Print("int to_$bit_field_name$ = 0;\n",
-        "bit_field_name", GetBitFieldName(i));
-    }
+  // Local vars for from and to bit fields to avoid accessing the builder and
+  // message over and over for these fields. Seems to provide a slight
+  // perforamance improvement in micro benchmark and this is also what proto1
+  // code does.
+  for (int i = 0; i < totalBuilderInts; i++) {
+    printer->Print("int from_$bit_field_name$ = $bit_field_name$;\n",
+                   "bit_field_name", GetBitFieldName(i));
+  }
+  for (int i = 0; i < totalMessageInts; i++) {
+    printer->Print("int to_$bit_field_name$ = 0;\n", "bit_field_name",
+                   GetBitFieldName(i));
   }
 
   // Output generation code for each field.
@@ -428,12 +419,10 @@ GenerateCommonBuilderMethods(io::Printer* printer) {
     field_generators_.get(descriptor_->field(i)).GenerateBuildingCode(printer);
   }
 
-  if (GenerateHasBits(descriptor_)) {
-    // Copy the bit field results to the generated message
-    for (int i = 0; i < totalMessageInts; i++) {
-      printer->Print("result.$bit_field_name$ = to_$bit_field_name$;\n",
-        "bit_field_name", GetBitFieldName(i));
-    }
+  // Copy the bit field results to the generated message
+  for (int i = 0; i < totalMessageInts; i++) {
+    printer->Print("result.$bit_field_name$ = to_$bit_field_name$;\n",
+                   "bit_field_name", GetBitFieldName(i));
   }
 
   for (int i = 0; i < descriptor_->oneof_decl_count(); i++) {
@@ -685,7 +674,7 @@ void MessageBuilderGenerator::GenerateIsInitialized(
                 context_->GetOneofGeneratorInfo(oneof);
             printer->Print("if ($oneof_name$Case_ == $field_number$) {\n",
                            "oneof_name", oneof_info->name, "field_number",
-                           SimpleItoa(field->number()));
+                           StrCat(field->number()));
           } else {
             printer->Print(
               "if (has$name$()) {\n",

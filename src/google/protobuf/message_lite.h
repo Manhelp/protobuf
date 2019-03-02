@@ -41,6 +41,7 @@
 
 #include <climits>
 #include <string>
+
 #include <google/protobuf/stubs/common.h>
 #include <google/protobuf/stubs/logging.h>
 #include <google/protobuf/arena.h>
@@ -71,12 +72,8 @@ class ZeroCopyOutputStream;
 }  // namespace io
 namespace internal {
 
-#if GOOGLE_PROTOBUF_ENABLE_EXPERIMENTAL_PARSER
 // See parse_context.h for explanation
 class ParseContext;
-typedef const char* (*ParseFunc)(const char* ptr, const char* end, void* object,
-                                 ParseContext* ctx);
-#endif  // GOOGLE_PROTOBUF_ENABLE_EXPERIMENTAL_PARSER
 
 class RepeatedPtrFieldBase;
 class WireFormatLite;
@@ -400,13 +397,9 @@ class PROTOBUF_EXPORT MessageLite {
   // method.)
   virtual int GetCachedSize() const = 0;
 
-  virtual uint8* InternalSerializeWithCachedSizesToArray(bool deterministic,
-                                                         uint8* target) const;
-
 #if GOOGLE_PROTOBUF_ENABLE_EXPERIMENTAL_PARSER
-  virtual internal::ParseFunc _ParseFunc() const {
-    GOOGLE_LOG(FATAL) << "Type " << typeid(*this).name()
-               << " doesn't implement _InternalParse";
+  virtual const char* _InternalParse(const char* ptr,
+                                     internal::ParseContext* ctx) {
     return nullptr;
   }
 #endif  // GOOGLE_PROTOBUF_ENABLE_EXPERIMENTAL_PARSER
@@ -451,6 +444,11 @@ class PROTOBUF_EXPORT MessageLite {
   // TODO(gerbens) make this a pure abstract function
   virtual const void* InternalGetTable() const { return NULL; }
 
+  // Fast path when conditions match (ie. non-deterministic)
+ public:
+  virtual uint8* InternalSerializeWithCachedSizesToArray(uint8* target) const;
+
+ private:
   friend class internal::WireFormatLite;
   friend class Message;
   friend class internal::WeakFieldMap;
@@ -494,7 +492,6 @@ extern template bool MergePartialFromImpl<false>(BoundedZCIS input,
 extern template bool MergePartialFromImpl<true>(BoundedZCIS input,
                                                 MessageLite* msg);
 
-
 template <typename T>
 struct SourceWrapper;
 
@@ -509,8 +506,8 @@ template <MessageLite::ParseFlags flags, typename T>
 bool MessageLite::ParseFrom(const T& input) {
   if (flags & kParse) Clear();
   constexpr bool alias = flags & kMergeWithAliasing;
-  return internal::MergePartialFromImpl<alias>(input, this) &&
-         ((flags & kMergePartial) || IsInitializedWithErrors());
+  bool res = internal::MergePartialFromImpl<alias>(input, this);
+  return res && ((flags & kMergePartial) || IsInitializedWithErrors());
 }
 
 }  // namespace protobuf

@@ -32,6 +32,13 @@
 #include <google/protobuf/extension_set.h>  // IWYU pragma: export
 #include <google/protobuf/generated_enum_reflection.h>
 #include <google/protobuf/unknown_field_set.h>
+namespace google {
+namespace protobuf {
+namespace internal {
+class AnyMetadata;
+}  // namespace internal
+}  // namespace protobuf
+}  // namespace google
 #include <google/protobuf/any.pb.h>
 #include <google/protobuf/source_context.pb.h>
 // @@protoc_insertion_point(includes)
@@ -102,9 +109,9 @@ enum Field_Kind {
   Field_Kind_Field_Kind_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::google::protobuf::int32>::max()
 };
 PROTOBUF_EXPORT bool Field_Kind_IsValid(int value);
-const Field_Kind Field_Kind_Kind_MIN = Field_Kind_TYPE_UNKNOWN;
-const Field_Kind Field_Kind_Kind_MAX = Field_Kind_TYPE_SINT64;
-const int Field_Kind_Kind_ARRAYSIZE = Field_Kind_Kind_MAX + 1;
+constexpr Field_Kind Field_Kind_Kind_MIN = Field_Kind_TYPE_UNKNOWN;
+constexpr Field_Kind Field_Kind_Kind_MAX = Field_Kind_TYPE_SINT64;
+constexpr int Field_Kind_Kind_ARRAYSIZE = Field_Kind_Kind_MAX + 1;
 
 PROTOBUF_EXPORT const ::google::protobuf::EnumDescriptor* Field_Kind_descriptor();
 inline const ::std::string& Field_Kind_Name(Field_Kind value) {
@@ -125,9 +132,9 @@ enum Field_Cardinality {
   Field_Cardinality_Field_Cardinality_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::google::protobuf::int32>::max()
 };
 PROTOBUF_EXPORT bool Field_Cardinality_IsValid(int value);
-const Field_Cardinality Field_Cardinality_Cardinality_MIN = Field_Cardinality_CARDINALITY_UNKNOWN;
-const Field_Cardinality Field_Cardinality_Cardinality_MAX = Field_Cardinality_CARDINALITY_REPEATED;
-const int Field_Cardinality_Cardinality_ARRAYSIZE = Field_Cardinality_Cardinality_MAX + 1;
+constexpr Field_Cardinality Field_Cardinality_Cardinality_MIN = Field_Cardinality_CARDINALITY_UNKNOWN;
+constexpr Field_Cardinality Field_Cardinality_Cardinality_MAX = Field_Cardinality_CARDINALITY_REPEATED;
+constexpr int Field_Cardinality_Cardinality_ARRAYSIZE = Field_Cardinality_Cardinality_MAX + 1;
 
 PROTOBUF_EXPORT const ::google::protobuf::EnumDescriptor* Field_Cardinality_descriptor();
 inline const ::std::string& Field_Cardinality_Name(Field_Cardinality value) {
@@ -146,9 +153,9 @@ enum Syntax {
   Syntax_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::google::protobuf::int32>::max()
 };
 PROTOBUF_EXPORT bool Syntax_IsValid(int value);
-const Syntax Syntax_MIN = SYNTAX_PROTO2;
-const Syntax Syntax_MAX = SYNTAX_PROTO3;
-const int Syntax_ARRAYSIZE = Syntax_MAX + 1;
+constexpr Syntax Syntax_MIN = SYNTAX_PROTO2;
+constexpr Syntax Syntax_MAX = SYNTAX_PROTO3;
+constexpr int Syntax_ARRAYSIZE = Syntax_MAX + 1;
 
 PROTOBUF_EXPORT const ::google::protobuf::EnumDescriptor* Syntax_descriptor();
 inline const ::std::string& Syntax_Name(Syntax value) {
@@ -162,7 +169,8 @@ inline bool Syntax_Parse(
 }
 // ===================================================================
 
-class PROTOBUF_EXPORT Type : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:google.protobuf.Type) */ {
+class PROTOBUF_EXPORT Type final :
+    public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:google.protobuf.Type) */ {
  public:
   Type();
   virtual ~Type();
@@ -231,8 +239,7 @@ class PROTOBUF_EXPORT Type : public ::google::protobuf::Message /* @@protoc_inse
 
   size_t ByteSizeLong() const final;
   #if GOOGLE_PROTOBUF_ENABLE_EXPERIMENTAL_PARSER
-  static const char* _InternalParse(const char* begin, const char* end, void* object, ::google::protobuf::internal::ParseContext* ctx);
-  ::google::protobuf::internal::ParseFunc _ParseFunc() const final { return _InternalParse; }
+  const char* _InternalParse(const char* ptr, ::google::protobuf::internal::ParseContext* ctx) final;
   #else
   bool MergePartialFromCodedStream(
       ::google::protobuf::io::CodedInputStream* input) final;
@@ -240,14 +247,18 @@ class PROTOBUF_EXPORT Type : public ::google::protobuf::Message /* @@protoc_inse
   void SerializeWithCachedSizes(
       ::google::protobuf::io::CodedOutputStream* output) const final;
   ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
-      bool deterministic, ::google::protobuf::uint8* target) const final;
+      ::google::protobuf::uint8* target) const final;
   int GetCachedSize() const final { return _cached_size_.Get(); }
 
   private:
-  void SharedCtor();
-  void SharedDtor();
+  inline void SharedCtor();
+  inline void SharedDtor();
   void SetCachedSize(int size) const final;
   void InternalSwap(Type* other);
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::google::protobuf::StringPiece FullMessageName() {
+    return "google.protobuf.Type";
+  }
   protected:
   explicit Type(::google::protobuf::Arena* arena);
   private:
@@ -374,7 +385,8 @@ class PROTOBUF_EXPORT Type : public ::google::protobuf::Message /* @@protoc_inse
 };
 // -------------------------------------------------------------------
 
-class PROTOBUF_EXPORT Field : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:google.protobuf.Field) */ {
+class PROTOBUF_EXPORT Field final :
+    public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:google.protobuf.Field) */ {
  public:
   Field();
   virtual ~Field();
@@ -443,8 +455,7 @@ class PROTOBUF_EXPORT Field : public ::google::protobuf::Message /* @@protoc_ins
 
   size_t ByteSizeLong() const final;
   #if GOOGLE_PROTOBUF_ENABLE_EXPERIMENTAL_PARSER
-  static const char* _InternalParse(const char* begin, const char* end, void* object, ::google::protobuf::internal::ParseContext* ctx);
-  ::google::protobuf::internal::ParseFunc _ParseFunc() const final { return _InternalParse; }
+  const char* _InternalParse(const char* ptr, ::google::protobuf::internal::ParseContext* ctx) final;
   #else
   bool MergePartialFromCodedStream(
       ::google::protobuf::io::CodedInputStream* input) final;
@@ -452,14 +463,18 @@ class PROTOBUF_EXPORT Field : public ::google::protobuf::Message /* @@protoc_ins
   void SerializeWithCachedSizes(
       ::google::protobuf::io::CodedOutputStream* output) const final;
   ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
-      bool deterministic, ::google::protobuf::uint8* target) const final;
+      ::google::protobuf::uint8* target) const final;
   int GetCachedSize() const final { return _cached_size_.Get(); }
 
   private:
-  void SharedCtor();
-  void SharedDtor();
+  inline void SharedCtor();
+  inline void SharedDtor();
   void SetCachedSize(int size) const final;
   void InternalSwap(Field* other);
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::google::protobuf::StringPiece FullMessageName() {
+    return "google.protobuf.Field";
+  }
   protected:
   explicit Field(::google::protobuf::Arena* arena);
   private:
@@ -479,52 +494,52 @@ class PROTOBUF_EXPORT Field : public ::google::protobuf::Message /* @@protoc_ins
   // nested types ----------------------------------------------------
 
   typedef Field_Kind Kind;
-  static const Kind TYPE_UNKNOWN =
+  static constexpr Kind TYPE_UNKNOWN =
     Field_Kind_TYPE_UNKNOWN;
-  static const Kind TYPE_DOUBLE =
+  static constexpr Kind TYPE_DOUBLE =
     Field_Kind_TYPE_DOUBLE;
-  static const Kind TYPE_FLOAT =
+  static constexpr Kind TYPE_FLOAT =
     Field_Kind_TYPE_FLOAT;
-  static const Kind TYPE_INT64 =
+  static constexpr Kind TYPE_INT64 =
     Field_Kind_TYPE_INT64;
-  static const Kind TYPE_UINT64 =
+  static constexpr Kind TYPE_UINT64 =
     Field_Kind_TYPE_UINT64;
-  static const Kind TYPE_INT32 =
+  static constexpr Kind TYPE_INT32 =
     Field_Kind_TYPE_INT32;
-  static const Kind TYPE_FIXED64 =
+  static constexpr Kind TYPE_FIXED64 =
     Field_Kind_TYPE_FIXED64;
-  static const Kind TYPE_FIXED32 =
+  static constexpr Kind TYPE_FIXED32 =
     Field_Kind_TYPE_FIXED32;
-  static const Kind TYPE_BOOL =
+  static constexpr Kind TYPE_BOOL =
     Field_Kind_TYPE_BOOL;
-  static const Kind TYPE_STRING =
+  static constexpr Kind TYPE_STRING =
     Field_Kind_TYPE_STRING;
-  static const Kind TYPE_GROUP =
+  static constexpr Kind TYPE_GROUP =
     Field_Kind_TYPE_GROUP;
-  static const Kind TYPE_MESSAGE =
+  static constexpr Kind TYPE_MESSAGE =
     Field_Kind_TYPE_MESSAGE;
-  static const Kind TYPE_BYTES =
+  static constexpr Kind TYPE_BYTES =
     Field_Kind_TYPE_BYTES;
-  static const Kind TYPE_UINT32 =
+  static constexpr Kind TYPE_UINT32 =
     Field_Kind_TYPE_UINT32;
-  static const Kind TYPE_ENUM =
+  static constexpr Kind TYPE_ENUM =
     Field_Kind_TYPE_ENUM;
-  static const Kind TYPE_SFIXED32 =
+  static constexpr Kind TYPE_SFIXED32 =
     Field_Kind_TYPE_SFIXED32;
-  static const Kind TYPE_SFIXED64 =
+  static constexpr Kind TYPE_SFIXED64 =
     Field_Kind_TYPE_SFIXED64;
-  static const Kind TYPE_SINT32 =
+  static constexpr Kind TYPE_SINT32 =
     Field_Kind_TYPE_SINT32;
-  static const Kind TYPE_SINT64 =
+  static constexpr Kind TYPE_SINT64 =
     Field_Kind_TYPE_SINT64;
   static inline bool Kind_IsValid(int value) {
     return Field_Kind_IsValid(value);
   }
-  static const Kind Kind_MIN =
+  static constexpr Kind Kind_MIN =
     Field_Kind_Kind_MIN;
-  static const Kind Kind_MAX =
+  static constexpr Kind Kind_MAX =
     Field_Kind_Kind_MAX;
-  static const int Kind_ARRAYSIZE =
+  static constexpr int Kind_ARRAYSIZE =
     Field_Kind_Kind_ARRAYSIZE;
   static inline const ::google::protobuf::EnumDescriptor*
   Kind_descriptor() {
@@ -539,22 +554,22 @@ class PROTOBUF_EXPORT Field : public ::google::protobuf::Message /* @@protoc_ins
   }
 
   typedef Field_Cardinality Cardinality;
-  static const Cardinality CARDINALITY_UNKNOWN =
+  static constexpr Cardinality CARDINALITY_UNKNOWN =
     Field_Cardinality_CARDINALITY_UNKNOWN;
-  static const Cardinality CARDINALITY_OPTIONAL =
+  static constexpr Cardinality CARDINALITY_OPTIONAL =
     Field_Cardinality_CARDINALITY_OPTIONAL;
-  static const Cardinality CARDINALITY_REQUIRED =
+  static constexpr Cardinality CARDINALITY_REQUIRED =
     Field_Cardinality_CARDINALITY_REQUIRED;
-  static const Cardinality CARDINALITY_REPEATED =
+  static constexpr Cardinality CARDINALITY_REPEATED =
     Field_Cardinality_CARDINALITY_REPEATED;
   static inline bool Cardinality_IsValid(int value) {
     return Field_Cardinality_IsValid(value);
   }
-  static const Cardinality Cardinality_MIN =
+  static constexpr Cardinality Cardinality_MIN =
     Field_Cardinality_Cardinality_MIN;
-  static const Cardinality Cardinality_MAX =
+  static constexpr Cardinality Cardinality_MAX =
     Field_Cardinality_Cardinality_MAX;
-  static const int Cardinality_ARRAYSIZE =
+  static constexpr int Cardinality_ARRAYSIZE =
     Field_Cardinality_Cardinality_ARRAYSIZE;
   static inline const ::google::protobuf::EnumDescriptor*
   Cardinality_descriptor() {
@@ -727,7 +742,8 @@ class PROTOBUF_EXPORT Field : public ::google::protobuf::Message /* @@protoc_ins
 };
 // -------------------------------------------------------------------
 
-class PROTOBUF_EXPORT Enum : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:google.protobuf.Enum) */ {
+class PROTOBUF_EXPORT Enum final :
+    public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:google.protobuf.Enum) */ {
  public:
   Enum();
   virtual ~Enum();
@@ -796,8 +812,7 @@ class PROTOBUF_EXPORT Enum : public ::google::protobuf::Message /* @@protoc_inse
 
   size_t ByteSizeLong() const final;
   #if GOOGLE_PROTOBUF_ENABLE_EXPERIMENTAL_PARSER
-  static const char* _InternalParse(const char* begin, const char* end, void* object, ::google::protobuf::internal::ParseContext* ctx);
-  ::google::protobuf::internal::ParseFunc _ParseFunc() const final { return _InternalParse; }
+  const char* _InternalParse(const char* ptr, ::google::protobuf::internal::ParseContext* ctx) final;
   #else
   bool MergePartialFromCodedStream(
       ::google::protobuf::io::CodedInputStream* input) final;
@@ -805,14 +820,18 @@ class PROTOBUF_EXPORT Enum : public ::google::protobuf::Message /* @@protoc_inse
   void SerializeWithCachedSizes(
       ::google::protobuf::io::CodedOutputStream* output) const final;
   ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
-      bool deterministic, ::google::protobuf::uint8* target) const final;
+      ::google::protobuf::uint8* target) const final;
   int GetCachedSize() const final { return _cached_size_.Get(); }
 
   private:
-  void SharedCtor();
-  void SharedDtor();
+  inline void SharedCtor();
+  inline void SharedDtor();
   void SetCachedSize(int size) const final;
   void InternalSwap(Enum* other);
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::google::protobuf::StringPiece FullMessageName() {
+    return "google.protobuf.Enum";
+  }
   protected:
   explicit Enum(::google::protobuf::Arena* arena);
   private:
@@ -916,7 +935,8 @@ class PROTOBUF_EXPORT Enum : public ::google::protobuf::Message /* @@protoc_inse
 };
 // -------------------------------------------------------------------
 
-class PROTOBUF_EXPORT EnumValue : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:google.protobuf.EnumValue) */ {
+class PROTOBUF_EXPORT EnumValue final :
+    public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:google.protobuf.EnumValue) */ {
  public:
   EnumValue();
   virtual ~EnumValue();
@@ -985,8 +1005,7 @@ class PROTOBUF_EXPORT EnumValue : public ::google::protobuf::Message /* @@protoc
 
   size_t ByteSizeLong() const final;
   #if GOOGLE_PROTOBUF_ENABLE_EXPERIMENTAL_PARSER
-  static const char* _InternalParse(const char* begin, const char* end, void* object, ::google::protobuf::internal::ParseContext* ctx);
-  ::google::protobuf::internal::ParseFunc _ParseFunc() const final { return _InternalParse; }
+  const char* _InternalParse(const char* ptr, ::google::protobuf::internal::ParseContext* ctx) final;
   #else
   bool MergePartialFromCodedStream(
       ::google::protobuf::io::CodedInputStream* input) final;
@@ -994,14 +1013,18 @@ class PROTOBUF_EXPORT EnumValue : public ::google::protobuf::Message /* @@protoc
   void SerializeWithCachedSizes(
       ::google::protobuf::io::CodedOutputStream* output) const final;
   ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
-      bool deterministic, ::google::protobuf::uint8* target) const final;
+      ::google::protobuf::uint8* target) const final;
   int GetCachedSize() const final { return _cached_size_.Get(); }
 
   private:
-  void SharedCtor();
-  void SharedDtor();
+  inline void SharedCtor();
+  inline void SharedDtor();
   void SetCachedSize(int size) const final;
   void InternalSwap(EnumValue* other);
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::google::protobuf::StringPiece FullMessageName() {
+    return "google.protobuf.EnumValue";
+  }
   protected:
   explicit EnumValue(::google::protobuf::Arena* arena);
   private:
@@ -1079,7 +1102,8 @@ class PROTOBUF_EXPORT EnumValue : public ::google::protobuf::Message /* @@protoc
 };
 // -------------------------------------------------------------------
 
-class PROTOBUF_EXPORT Option : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:google.protobuf.Option) */ {
+class PROTOBUF_EXPORT Option final :
+    public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:google.protobuf.Option) */ {
  public:
   Option();
   virtual ~Option();
@@ -1148,8 +1172,7 @@ class PROTOBUF_EXPORT Option : public ::google::protobuf::Message /* @@protoc_in
 
   size_t ByteSizeLong() const final;
   #if GOOGLE_PROTOBUF_ENABLE_EXPERIMENTAL_PARSER
-  static const char* _InternalParse(const char* begin, const char* end, void* object, ::google::protobuf::internal::ParseContext* ctx);
-  ::google::protobuf::internal::ParseFunc _ParseFunc() const final { return _InternalParse; }
+  const char* _InternalParse(const char* ptr, ::google::protobuf::internal::ParseContext* ctx) final;
   #else
   bool MergePartialFromCodedStream(
       ::google::protobuf::io::CodedInputStream* input) final;
@@ -1157,14 +1180,18 @@ class PROTOBUF_EXPORT Option : public ::google::protobuf::Message /* @@protoc_in
   void SerializeWithCachedSizes(
       ::google::protobuf::io::CodedOutputStream* output) const final;
   ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
-      bool deterministic, ::google::protobuf::uint8* target) const final;
+      ::google::protobuf::uint8* target) const final;
   int GetCachedSize() const final { return _cached_size_.Get(); }
 
   private:
-  void SharedCtor();
-  void SharedDtor();
+  inline void SharedCtor();
+  inline void SharedDtor();
   void SetCachedSize(int size) const final;
   void InternalSwap(Option* other);
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::google::protobuf::StringPiece FullMessageName() {
+    return "google.protobuf.Option";
+  }
   protected:
   explicit Option(::google::protobuf::Arena* arena);
   private:

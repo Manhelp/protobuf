@@ -139,17 +139,17 @@
 
 #include <google/protobuf/port_def.inc>
 
-#if GOOGLE_PROTOBUF_ENABLE_EXPERIMENTAL_PARSER
-#include "util/coding/varint.h"
-#endif
-
 namespace google {
 namespace protobuf {
 
 class DescriptorPool;
 class MessageFactory;
+class ZeroCopyCodedInputStream;
 
-namespace internal { void MapTestForceDeterministic(); }
+namespace internal {
+void MapTestForceDeterministic();
+class EpsCopyByteStream;
+}  // namespace internal
 
 namespace io {
 
@@ -161,13 +161,6 @@ class CodedOutputStream;
 class ZeroCopyInputStream;           // zero_copy_stream.h
 class ZeroCopyOutputStream;          // zero_copy_stream.h
 
-template <typename T>
-T UnalignedLoad(const void* p) {
-  T res;
-  memcpy(&res, p, sizeof(T));
-  return res;
-}
-
 // Class which reads and decodes binary data which is composed of varint-
 // encoded integers and fixed-width pieces.  Wraps a ZeroCopyInputStream.
 // Most users will not need to deal with CodedInputStream.
@@ -175,6 +168,8 @@ T UnalignedLoad(const void* p) {
 // Most methods of CodedInputStream that return a bool return false if an
 // underlying I/O error occurs or if the data is malformed.  Once such a
 // failure occurs, the CodedInputStream is broken and is no longer useful.
+// After a failure, callers also should assume writes to "out" args may have
+// occurred, though nothing useful can be determined from those writes.
 class PROTOBUF_EXPORT CodedInputStream {
  public:
   // Create a CodedInputStream that reads from the given ZeroCopyInputStream.
@@ -418,6 +413,7 @@ class PROTOBUF_EXPORT CodedInputStream {
   void SetRecursionLimit(int limit);
   int RecursionBudget() { return recursion_budget_; }
 
+  static int GetDefaultRecursionLimit() { return default_recursion_limit_; }
 
   // Increments the current recursion depth.  Returns true if the depth is
   // under the limit, false if it has gone over.
@@ -643,6 +639,9 @@ class PROTOBUF_EXPORT CodedInputStream {
   static const int kDefaultTotalBytesLimit = INT_MAX;
 
   static int default_recursion_limit_;  // 100 by default.
+
+  friend class google::protobuf::ZeroCopyCodedInputStream;
+  friend class google::protobuf::internal::EpsCopyByteStream;
 };
 
 // Class which encodes and writes binary data which is composed of varint-

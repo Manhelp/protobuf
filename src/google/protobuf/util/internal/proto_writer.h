@@ -154,12 +154,18 @@ class PROTOBUF_EXPORT ProtoWriter : public StructuredObjectWriter {
     ignore_unknown_fields_ = ignore_unknown_fields;
   }
 
+  bool ignore_unknown_fields() { return ignore_unknown_fields_; }
+
   void set_ignore_unknown_enum_values(bool ignore_unknown_enum_values) {
     ignore_unknown_enum_values_ = ignore_unknown_enum_values;
   }
 
   void set_use_lower_camel_for_enums(bool use_lower_camel_for_enums) {
     use_lower_camel_for_enums_ = use_lower_camel_for_enums;
+  }
+
+  void set_case_insensitive_enum_parsing(bool case_insensitive_enum_parsing) {
+    case_insensitive_enum_parsing_ = case_insensitive_enum_parsing;
   }
 
  protected:
@@ -315,6 +321,7 @@ class PROTOBUF_EXPORT ProtoWriter : public StructuredObjectWriter {
                                   const google::protobuf::Enum* enum_type,
                                   io::CodedOutputStream* stream,
                                   bool use_lower_camel_for_enums,
+                                  bool case_insensitive_enum_parsing,
                                   bool ignore_unknown_values);
 
   // Variables for describing the structure of the input tree:
@@ -337,6 +344,9 @@ class PROTOBUF_EXPORT ProtoWriter : public StructuredObjectWriter {
   // If true, check if enum name in camel case or without underscore matches the
   // field name.
   bool use_lower_camel_for_enums_;
+
+  // If true, check if enum name in UPPER_CASE matches the field name.
+  bool case_insensitive_enum_parsing_;
 
   // Variable for internal state processing:
   // element_    : the current element.

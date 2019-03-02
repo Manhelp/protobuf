@@ -867,9 +867,7 @@ void GeneratedMessageReflection::ClearField(
 
       case FieldDescriptor::CPPTYPE_MESSAGE: {
         if (IsMapFieldInApi(field)) {
-          MutableRaw<MapFieldBase>(message, field)
-              ->MutableRepeatedField()
-              ->Clear<GenericTypeHandler<Message> >();
+          MutableRaw<MapFieldBase>(message, field)->Clear();
         } else {
           // We don't know which subclass of RepeatedPtrFieldBase the type is,
           // so we use RepeatedPtrFieldBase directly.
@@ -1706,8 +1704,6 @@ void* GeneratedMessageReflection::MutableRawRepeatedField(
   if (field->cpp_type() != cpptype)
     ReportReflectionUsageTypeError(descriptor_,
         field, "MutableRawRepeatedField", cpptype);
-  if (ctype >= 0 && !field->is_extension())
-    GOOGLE_CHECK_EQ(field->options().ctype(), ctype) << "subtype mismatch";
   if (desc != NULL)
     GOOGLE_CHECK_EQ(field->message_type(), desc) << "wrong submessage type";
   if (field->is_extension()) {
@@ -2224,12 +2220,20 @@ void* GeneratedMessageReflection::RepeatedFieldData(
   }
 }
 
-MapFieldBase* GeneratedMessageReflection::MapData(
+MapFieldBase* GeneratedMessageReflection::MutableMapData(
     Message* message, const FieldDescriptor* field) const {
   USAGE_CHECK(IsMapFieldInApi(field),
               "GetMapData",
               "Field is not a map field.");
   return MutableRaw<MapFieldBase>(message, field);
+}
+
+const MapFieldBase* GeneratedMessageReflection::GetMapData(
+    const Message& message, const FieldDescriptor* field) const {
+  USAGE_CHECK(IsMapFieldInApi(field),
+              "GetMapData",
+              "Field is not a map field.");
+  return &(GetRaw<MapFieldBase>(message, field));
 }
 
 namespace {

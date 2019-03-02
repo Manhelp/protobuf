@@ -34,7 +34,6 @@
 #include <google/protobuf/io/zero_copy_stream_impl_lite.h>
 #include <google/protobuf/stubs/once.h>
 #include <google/protobuf/wire_format_lite.h>
-#include <google/protobuf/wire_format_lite_inl.h>
 
 #include <google/protobuf/port_def.inc>
 
@@ -49,11 +48,9 @@ bool ImplicitWeakMessage::MergePartialFromCodedStream(io::CodedInputStream* inpu
 }
 
 #if GOOGLE_PROTOBUF_ENABLE_EXPERIMENTAL_PARSER
-const char* ImplicitWeakMessage::_InternalParse(const char* begin,
-                                                const char* end, void* object,
+const char* ImplicitWeakMessage::_InternalParse(const char* ptr,
                                                 ParseContext* ctx) {
-  return internal::StringParser(
-      begin, end, &(static_cast<ImplicitWeakMessage*>(object)->data_), ctx);
+  return ctx->AppendString(ptr, &data_);
 }
 #endif
 

@@ -186,6 +186,8 @@ util::Status JsonToBinaryStream(TypeResolver* resolver,
   proto_writer_options.ignore_unknown_fields = options.ignore_unknown_fields;
   proto_writer_options.ignore_unknown_enum_values =
       options.ignore_unknown_fields;
+  proto_writer_options.case_insensitive_enum_parsing =
+      options.case_insensitive_enum_parsing;
   converter::ProtoStreamObjectWriter proto_writer(resolver, type, &sink,
                                                   &listener,
                                                   proto_writer_options);

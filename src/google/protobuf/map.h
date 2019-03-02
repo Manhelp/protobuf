@@ -414,7 +414,7 @@ class Map {
           : node_(NodePtrFromKeyPtr(*tree_it)), m_(m), bucket_index_(index) {
         // Invariant: iterators that use buckets with trees have an even
         // bucket_index_.
-        GOOGLE_DCHECK_EQ(bucket_index_ % 2, 0);
+        GOOGLE_DCHECK_EQ(bucket_index_ % 2, 0u);
       }
 
       // Advance through buckets, looking for the first that isn't empty.
@@ -454,7 +454,7 @@ class Map {
           if (is_list) {
             SearchFrom(bucket_index_ + 1);
           } else {
-            GOOGLE_DCHECK_EQ(bucket_index_ & 1, 0);
+            GOOGLE_DCHECK_EQ(bucket_index_ & 1, 0u);
             Tree* tree = static_cast<Tree*>(m_->table_[bucket_index_]);
             if (++tree_it == tree->end()) {
               SearchFrom(bucket_index_ + 2);
@@ -559,6 +559,7 @@ class Map {
 
     iterator find(const Key& k) { return iterator(FindHelper(k).first); }
     const_iterator find(const Key& k) const { return find(k, NULL); }
+    bool contains(const Key& k) const { return find(k) != end(); }
 
     // In traditional C++ style, this performs "insert if not present."
     std::pair<iterator, bool> insert(const KeyValuePair& kv) {
@@ -1079,6 +1080,7 @@ class Map {
     return const_iterator(iterator(elements_->find(key)));
   }
   iterator find(const key_type& key) { return iterator(elements_->find(key)); }
+  bool contains(const Key& key) const { return elements_->contains(key); }
   std::pair<const_iterator, const_iterator> equal_range(
       const key_type& key) const {
     const_iterator it = find(key);

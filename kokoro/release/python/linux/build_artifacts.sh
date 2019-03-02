@@ -7,11 +7,17 @@ pushd $(dirname $0)/../../../..
 
 export REPO_DIR=protobuf
 export BUILD_VERSION=`grep -i "version" python/google/protobuf/__init__.py | grep -o "'.*'" | tr -d "'"`
-export BUILD_COMMIT=v$BUILD_VERSION
+if [ -z $KOKORO_JOB_NAME ]; then
+  export BUILD_COMMIT=master
+else
+  export BUILD_COMMIT=`echo "$KOKORO_JOB_NAME" | cut -d '/' -f 3`
+fi
 export PLAT=x86_64
 export UNICODE_WIDTH=32
 export MACOSX_DEPLOYMENT_TARGET=10.9
 
+rm -rf artifacts/
+rm -rf multibuild/
 mkdir artifacts
 export ARTIFACT_DIR=$(pwd)/artifacts
 
@@ -43,3 +49,4 @@ build_artifact_version 2.7
 build_artifact_version 3.4
 build_artifact_version 3.5
 build_artifact_version 3.6
+build_artifact_version 3.7
